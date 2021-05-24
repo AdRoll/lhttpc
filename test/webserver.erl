@@ -120,7 +120,6 @@ listen(ssl) ->
          binary,
          {active, false},
          {ip, {127, 0, 0, 1}},
-         {verify, 0},
          {keyfile, code:lib_dir(lhttpc, 'test/key.pem')},
          {certfile, code:lib_dir(lhttpc, 'test/crt.pem')}],
     {ok, LS} = ssl:listen(0, Opts),
