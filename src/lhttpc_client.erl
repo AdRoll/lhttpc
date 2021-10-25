@@ -34,9 +34,6 @@
 
 -export([request/10]).
 
-%% @todo Remove this once https://github.com/inaka/elvis_core/issues/170 is fixed.
--elvis([{elvis_style, atom_naming_convention, disable}]).
-
 -include("lhttpc_types.hrl").
 
 -record(client_state,
