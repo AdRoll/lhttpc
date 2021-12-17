@@ -117,6 +117,6 @@ cover_compile([Module | Modules]) ->
 cover_compile([]) ->
     ok.
 
-%%% Eunit functions
+%%% eunit functions
 application_test_() ->
     {application, lhttpc}.

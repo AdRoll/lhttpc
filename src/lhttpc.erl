@@ -434,7 +434,6 @@ send_body_part({Pid, 0}, IoList, Timeout) when is_pid(Pid) ->
         kill_client(Pid)
     end;
 send_body_part({Pid, Window}, IoList, _Timeout) when Window > 0, is_pid(Pid) ->
-    % atom > 0 =:= true
     Pid ! {body_part, self(), IoList},
     receive
         {ack, Pid} ->

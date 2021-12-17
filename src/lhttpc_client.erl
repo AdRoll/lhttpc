@@ -108,7 +108,7 @@ request(ReqId, From, Host, Port, Ssl, Path, Method, Hdrs, Body, Options) ->
         _Else ->
             From ! Result
     end,
-    % Don't send back {'EXIT', self(), normal} if the process
+    % Don't send back {'EXIT', Pid, normal} if the process
     % calling us is trapping exits
     unlink(From),
     ok.
