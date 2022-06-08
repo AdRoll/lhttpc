@@ -32,6 +32,9 @@
 %%% not be called directly since it should be spawned by the lhttpc module.
 -module(lhttpc_client).
 
+%% Throw is used correctly in this module as a nonlocal return within a large function
+-elvis([{elvis_style, no_throw, disable}]).
+
 -export([request/10]).
 
 %% @todo Remove this once https://github.com/inaka/elvis_core/issues/170 is fixed.
