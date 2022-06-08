@@ -27,6 +27,9 @@
 %%% @author Oscar Hellstrom <oscar@hellstrom.st>
 -module(lhttpc_tests).
 
+%% eunit :'(
+-hank([unnecessary_function_arguments]).
+
 %% Macros in binary constructions.
 -format ignore.
 -elvis ignore.

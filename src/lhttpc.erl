@@ -31,6 +31,9 @@
 %%% @end
 -module(lhttpc).
 
+%% catch X is used as a way to fire and forget, ignoring errors if there are any
+-elvis([{elvis_style, no_catch_expressions, disable}]).
+
 -behaviour(application).
 
 %% this is the API module; xref ignore all exports

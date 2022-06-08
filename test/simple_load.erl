@@ -1,5 +1,8 @@
 -module(simple_load).
 
+%% eunit :'(
+-hank([unnecessary_function_arguments]).
+
 -export([start_client/2, start_client/3]).
 -export([client/2]).
 -export([start_server/0]).
