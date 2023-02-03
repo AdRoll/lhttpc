@@ -31,6 +31,9 @@
 %%% @end
 -module(lhttpc).
 
+%% @todo Remove once https://github.com/erlang/otp/issues/6779 is fixed
+-dialyzer([{no_missing_return, [start/2]}]).
+
 %% catch X is used as a way to fire and forget, ignoring errors if there are any
 -elvis([{elvis_style, no_catch_expressions, disable}]).
 
@@ -86,7 +89,7 @@ stop(_) ->
 %%
 %% For more info on possible return values the `application' module.
 %% @end
--spec start() -> ok | {error, any()}.
+-spec start() -> {ok, [atom()]} | {error, {atom(), _}}.
 start() ->
     application:ensure_all_started(lhttpc).
 
