@@ -42,7 +42,7 @@
                  SSL :: boolean(),
                  max_connections(),
                  connection_timeout()) ->
-                    {ok, pid()}.
+                    {ok, pid()} | ignore | {error, _}.
 start_link(Host, Port, Ssl, MaxConn, ConnTimeout) ->
     gen_server:start_link(?MODULE, {Host, Port, Ssl, MaxConn, ConnTimeout}, []).
 
@@ -257,7 +257,7 @@ add_client(Tid, Pid) ->
 remove_client(Tid, Pid) ->
     case ets:lookup(Tid, Pid) of
         [] ->
-            ok; % client already removed
+            true; % client already removed
         [{_Pid, Ref}] ->
             erlang:demonitor(Ref, [flush]),
             ets:delete(Tid, Pid)

@@ -50,7 +50,10 @@
 %% `Options' are the normal `gen_tcp' or `ssl' Options.
 %% @end
 -spec connect(host(), integer(), socket_options(), timeout(), boolean()) ->
-                 {ok, socket()} | {error, atom()}.
+                 {ok, gen_tcp:socket() | ssl:sslsocket()} |
+                 {ok, ssl:sslsocket(), ssl:protocol_extensions()} |
+                 {error, _} |
+                 {option_not_a_key_value_tuple, _}.
 connect(Host, Port, Options, Timeout, true) ->
     % Avoid port leak with potential race condition in case of timeout
     Flag = process_flag(trap_exit, true),

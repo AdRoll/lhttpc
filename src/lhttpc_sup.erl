@@ -43,7 +43,7 @@
 %% This is normally called from an application behaviour or from another
 %% supervisor.
 %% @end
--spec start_link() -> {ok, pid()} | {error, atom()}.
+-spec start_link() -> {ok, pid()} | ignore | {error, atom()}.
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
