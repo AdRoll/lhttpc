@@ -245,7 +245,7 @@ encode_body_part(#client_state{chunked_upload = true}, http_eob) ->
 encode_body_part(#client_state{chunked_upload = false}, http_eob) ->
     <<>>;
 encode_body_part(#client_state{chunked_upload = true}, Data) ->
-    Size = list_to_binary(erlang:integer_to_list(iolist_size(Data), 16)),
+    Size = integer_to_binary(iolist_size(Data), 16),
     [Size, <<"\r\n">>, Data, <<"\r\n">>];
 encode_body_part(#client_state{chunked_upload = false}, Data) ->
     Data.
