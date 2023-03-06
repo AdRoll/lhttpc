@@ -36,8 +36,6 @@
 -export([maybe_atom_to_list/1]).
 -export([format_hdrs/1, dec/1]).
 
--include("lhttpc_types.hrl").
-
 %% @spec header_value(Header, Headers) -> undefined | term()
 %% Header = string()
 %% Headers = [{string(), term()}]
@@ -89,12 +87,12 @@ maybe_atom_to_list(Atom) when is_atom(Atom) ->
 maybe_atom_to_list(List) when is_list(List) ->
     List.
 
-%% @spec (URL) -> {Host, Port, Path, Ssl}
+%% @spec (URL) -> {Host, Port, Path, SSL}
 %%   URL = string()
 %%   Host = string()
 %%   Port = integer()
 %%   Path = string()
-%%   Ssl = boolean()
+%%   SSL = boolean()
 %% @doc
 -spec parse_url(string()) -> {string(), integer(), string(), boolean()}.
 parse_url(URL) ->
@@ -143,7 +141,7 @@ split_port(Scheme, [P | T], Port) ->
 %% PartialUpload = true | false
 -spec format_request(iolist(),
                      atom() | string(),
-                     headers(),
+                     lhttpc:headers(),
                      string(),
                      integer(),
                      iolist(),
@@ -168,7 +166,7 @@ normalize_method(Method) when is_atom(Method) ->
 normalize_method(Method) ->
     Method.
 
--spec format_hdrs(headers()) -> iolist().
+-spec format_hdrs(lhttpc:headers()) -> iolist().
 format_hdrs(Headers) ->
     format_hdrs(Headers, []).
 
