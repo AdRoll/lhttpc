@@ -35,7 +35,8 @@
 -dialyzer([{no_missing_return, [start/2]}]).
 
 %% catch X is used as a way to fire and forget, ignoring errors if there are any
--elvis([{elvis_style, no_catch_expressions, disable}]).
+-elvis([{elvis_style, no_catch_expressions, disable},
+        {elvis_style, max_function_arity, #{max_arity => 9}}]).
 
 -behaviour(application).
 
@@ -60,10 +61,23 @@
          request/9, send_body_part/2, send_body_part/3, send_trailers/2, send_trailers/3,
          get_body_part/1, get_body_part/2]).
 
--include("lhttpc_types.hrl").
-
+-type header() :: {string() | atom(), string()}.
+-type headers() :: [header()].
+-type option() ::
+    {connect_options, list()} |
+    {connect_timeout, timeout()} |
+    {connection_timeout, non_neg_integer() | infinity} |
+    {max_connections, non_neg_integer()} |
+    {send_retry, non_neg_integer()} |
+    {stream_to, pid()} |
+    {partial_upload, non_neg_integer() | infinity} |
+    {partial_download, pid(), non_neg_integer() | infinity}.
+-type options() :: [option()].
+-type window_size() :: non_neg_integer() | infinity.
 -type result() ::
     {ok, {{pos_integer(), string()}, headers(), binary()}} | {error, atom()}.
+
+-export_type([headers/0, options/0, result/0, window_size/0]).
 
 %% @hidden
 -spec start(any(), any()) -> {ok, pid()}.
@@ -190,25 +204,25 @@ request(URL, Method, Hdrs, Body, Timeout) ->
 %%   Reason = connection_closed | connect_timeout | timeout
 %% @doc Sends a request with a body.
 %% Would be the same as calling <pre>
-%% {Host, Port, Path, Ssl} = lhttpc_lib:parse_url(URL),
-%% request(Host, Port, Path, Ssl, Method, Hdrs, Body, Timeout, Options).
+%% {Host, Port, Path, SSL} = lhttpc_lib:parse_url(URL),
+%% request(Host, Port, Path, SSL, Method, Hdrs, Body, Timeout, Options).
 %% </pre>
 %%
 %% `URL' is expected to be a valid URL:
 %% `scheme://host[:port][/path]'.
 %% @end
 %% @see request/9
--spec request(string(), string() | atom(), headers(), iolist(), timeout(), [option()]) ->
+-spec request(string(), string() | atom(), headers(), iolist(), timeout(), options()) ->
                  result().
 request(URL, Method, Hdrs, Body, Timeout, Options) ->
-    {Host, Port, Path, Ssl} = lhttpc_lib:parse_url(URL),
-    request(Host, Port, Ssl, Path, Method, Hdrs, Body, Timeout, Options).
+    {Host, Port, Path, SSL} = lhttpc_lib:parse_url(URL),
+    request(Host, Port, SSL, Path, Method, Hdrs, Body, Timeout, Options).
 
-%% @spec (Host, Port, Ssl, Path, Method, Hdrs, RequestBody, Timeout, Options) ->
+%% @spec (Host, Port, SSL, Path, Method, Hdrs, RequestBody, Timeout, Options) ->
 %%                                                                        Result
 %%   Host = string()
 %%   Port = integer()
-%%   Ssl = boolean()
+%%   SSL = boolean()
 %%   Path = string()
 %%   Method = string() | atom()
 %%   Hdrs = [{Header, Value}]
@@ -243,7 +257,7 @@ request(URL, Method, Hdrs, Body, Timeout, Options) ->
 %% use the following:<br/>
 %% `Host' = `"example.com"'<br/>
 %% `Port' = `80'<br/>
-%% `Ssl' = `false'<br/>
+%% `SSL' = `false'<br/>
 %% `Path' = `"/foobar"'<br/>
 %% `Path' must begin with a forward slash `/'.
 %%
@@ -346,25 +360,33 @@ request(URL, Method, Hdrs, Body, Timeout, Options) ->
               headers(),
               iolist(),
               timeout(),
-              [option()]) ->
+              options()) ->
                  result().
-request(Host, Port, Ssl, Path, Method, Hdrs, Body, Timeout, Options) ->
+request(Host, Port, SSL, Path, Method, Hdrs, Body, Timeout, Options) ->
     ok = verify_options(Options),
     ReqId = make_ref(),
-    BaseArgs = [Host, Port, Ssl, Path, Method, Hdrs, Body, Options],
+    BaseArg =
+        #{host => Host,
+          port => Port,
+          ssl => SSL,
+          path => Path,
+          method => Method,
+          headers => Hdrs,
+          body => Body,
+          options => Options},
     case proplists:is_defined(stream_to, Options) of
         true ->
             StreamTo = proplists:get_value(stream_to, Options),
-            Args = [ReqId, StreamTo | BaseArgs],
-            Pid = spawn(lhttpc_client, request, Args),
+            Arg = BaseArg#{id => ReqId, from => StreamTo},
+            Pid = spawn(lhttpc_client, request, [Arg]),
             spawn(fun() ->
                      R = kill_client_after(Pid, Timeout),
                      StreamTo ! {response, ReqId, Pid, R}
                   end),
             {ReqId, Pid};
         false ->
-            Args = [ReqId, self() | BaseArgs],
-            Pid = spawn_link(lhttpc_client, request, Args),
+            Arg = BaseArg#{id => ReqId, from => self()},
+            Pid = spawn_link(lhttpc_client, request, [Arg]),
             receive
                 {response, ReqId, Pid, R} ->
                     R;

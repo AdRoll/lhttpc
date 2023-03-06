@@ -32,9 +32,13 @@
 %%% Makes it possible to have the same interface to ssl and tcp sockets.
 -module(lhttpc_sock).
 
--export([connect/5, recv/2, recv/3, send/3, controlling_process/3, setopts/3, close/2]).
+-type host() :: string() | {integer(), integer(), integer(), integer()}.
+-type socket_options() :: [{atom(), term()} | atom()].
+-type socket() :: ssl:sslsocket() | gen_tcp:socket().
 
--include("lhttpc_types.hrl").
+-export_type([host/0, socket_options/0, socket/0]).
+
+-export([connect/5, recv/2, recv/3, send/3, controlling_process/3, setopts/3, close/2]).
 
 %% @spec (Host, Port, Options, Timeout, SslFlag) -> {ok, Socket} | {error, Reason}
 %%   Host = string() | ip_address()
@@ -50,7 +54,7 @@
 %% `Options' are the normal `gen_tcp' or `ssl' Options.
 %% @end
 -spec connect(host(), integer(), socket_options(), timeout(), boolean()) ->
-                 {ok, gen_tcp:socket() | ssl:sslsocket()} |
+                 {ok, socket()} |
                  {ok, ssl:sslsocket(), ssl:protocol_extensions()} |
                  {error, _} |
                  {option_not_a_key_value_tuple, _}.
